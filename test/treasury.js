@@ -1,6 +1,6 @@
-const { expect } = require("chai");
+// const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const hre = require("hardhat");
+// const hre = require("hardhat");
 const { delay, fromBigNum, toBigNum, saveFiles, sign } = require("./utils.js");
 
 // owner
@@ -14,8 +14,7 @@ var addresses = {};
 try {
     const addressesJson = require("../build/addresses.json");
     addresses = addressesJson;
-} catch (err) {
-}
+} catch (err) {}
 
 describe("Create UserWallet", function () {
     it("Create account", async function () {
@@ -24,7 +23,12 @@ describe("Create UserWallet", function () {
 
         chainId = (await provider.getNetwork()).chainId;
         let balance = await provider.getBalance(owner.address);
-        console.log(owner.address, userWallet.address, chainId, fromBigNum(balance));
+        console.log(
+            owner.address,
+            userWallet.address,
+            chainId,
+            fromBigNum(balance)
+        );
     });
 });
 
@@ -35,7 +39,7 @@ describe("deploy contract", function () {
             treasury = await Factory.deploy();
             await treasury.deployed();
         } else {
-            treasury = Factory.attach(addresses[chainId].treasury)
+            treasury = Factory.attach(addresses[chainId].treasury);
         }
     });
     it("deploy token", async function () {
@@ -50,7 +54,7 @@ describe("deploy contract", function () {
             var tx = await treasury.setTokenAddress(token.address);
             await tx.wait();
         } else {
-            token = Factory.attach(addresses[chainId].token)
+            token = Factory.attach(addresses[chainId].token);
         }
     });
 });
@@ -58,7 +62,10 @@ describe("deploy contract", function () {
 if (!isDeploy) {
     describe("test contract", function () {
         it("approve token", async function () {
-            var tx = await token.approve(treasury.address, toBigNum(1000000, 8));
+            var tx = await token.approve(
+                treasury.address,
+                toBigNum(1000000, 8)
+            );
             await tx.wait();
         });
         it("deposit token", async function () {
@@ -78,18 +85,17 @@ describe("Save contracts", function () {
     it("save abis", async function () {
         const abis = {
             treasury: artifacts.readArtifactSync("Treasury").abi,
-            token: artifacts.readArtifactSync("Token").abi
+            token: artifacts.readArtifactSync("Token").abi,
         };
         await saveFiles("abis.json", JSON.stringify(abis, undefined, 4));
     });
     it("save addresses", async function () {
-
         addresses = {
             ...addresses,
             [chainId]: {
                 treasury: treasury.address,
-                token: token.address
-            }
+                token: token.address,
+            },
         };
         await saveFiles(
             `addresses.json`,
