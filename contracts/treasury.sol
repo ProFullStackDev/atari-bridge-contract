@@ -40,6 +40,5 @@ contract Treasury is Ownable {
     }
 
     receive() external payable {}
-
     fallback() external {}
 }
