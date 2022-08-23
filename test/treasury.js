@@ -5,7 +5,7 @@ const { delay, fromBigNum, toBigNum, saveFiles, sign } = require("./utils.js");
 
 // owner
 var owner, userWallet, provider, chainId, chainName;
-var treasury, token;
+var treasury, token, staking;
 
 // deploy mode
 const isDeploy = true;
@@ -57,6 +57,22 @@ describe("deploy contract", function () {
             token = Factory.attach(addresses[chainId].token);
         }
     });
+    it("deploy staking", async function () {
+        const Factory = await ethers.getContractFactory("Staking");
+        if (isDeploy) {
+            staking = await Factory.deploy();
+            await staking.deployed();
+            // fill token to bridge
+            tx = await token.transfer(staking.address, toBigNum(10 ** 7));
+            await tx.wait();
+            //set bridge token
+            var tx = await staking.setTokenAddress(token.address);
+            await tx.wait();
+        } else {
+            token = Factory.attach(addresses[chainId].staking)
+        }
+    });
+
 });
 
 if (!isDeploy) {
@@ -86,6 +102,7 @@ describe("Save contracts", function () {
         const abis = {
             treasury: artifacts.readArtifactSync("Treasury").abi,
             token: artifacts.readArtifactSync("Token").abi,
+            staking: artifacts.readArtifactSync("Staking").abi
         };
         await saveFiles("abis.json", JSON.stringify(abis, undefined, 4));
     });
@@ -95,7 +112,8 @@ describe("Save contracts", function () {
             [chainId]: {
                 treasury: treasury.address,
                 token: token.address,
-            },
+                staking: staking.address
+            }
         };
         await saveFiles(
             `addresses.json`,
